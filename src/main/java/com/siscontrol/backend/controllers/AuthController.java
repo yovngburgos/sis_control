@@ -24,20 +24,22 @@ public class AuthController {
         if (user.isPresent()) {
             return ResponseEntity.ok(
                     new AuthResponseDTO(
-                            "Login exitoso",
-                            true,
-                            user.get().getUsername(),
-                            user.get().getRole().name()
-                    )
+                        "Login exitoso",
+                        true,
+                        user.get().getId(),
+                        user.get().getUsername(),
+                        user.get().getRole().name()
+                        )
             );
         }
 
         return ResponseEntity.status(401).body(
                 new AuthResponseDTO(
-                        "Credenciales inválidas",
-                        false,
-                        null,
-                        null
+                "Credenciales inválidas",
+                false,
+                null,
+                null,
+                null
                 )
         );
     }
