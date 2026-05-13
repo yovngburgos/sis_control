@@ -1,5 +1,6 @@
 package com.siscontrol.backend.controllers;
 
+import com.siscontrol.backend.dto.NfcScanRequestDTO;
 import com.siscontrol.backend.dto.IncidentDTO;
 import com.siscontrol.backend.models.Checklog;
 import com.siscontrol.backend.services.IncidentService;
@@ -90,6 +91,11 @@ public class RoundController {
     @PostMapping("/escaneo")
     public ResponseEntity<Map<String, Object>> realizarEscaneo(@RequestBody Checklog log) {
         return new ResponseEntity<>(roundService.registrarEscaneo(log), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/escaneo-nfc")
+    public ResponseEntity<Map<String, Object>> realizarEscaneoNfc(@RequestBody NfcScanRequestDTO request) {
+        return new ResponseEntity<>(roundService.registrarEscaneoNfc(request), HttpStatus.CREATED);
     }
 
     @PostMapping("/incidente")

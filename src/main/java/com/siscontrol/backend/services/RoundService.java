@@ -6,6 +6,7 @@ import com.siscontrol.backend.models.RoundExecution;
 import com.siscontrol.backend.repositories.InstallationRepository;
 import com.siscontrol.backend.repositories.ChecklogRepository;
 import com.siscontrol.backend.repositories.RoundExecutionRepository;
+import com.siscontrol.backend.dto.NfcScanRequestDTO;
 
 import com.siscontrol.backend.enums.*;
 import com.siscontrol.backend.models.*;
@@ -140,6 +141,42 @@ public class RoundService {
         log.setTimestamp(LocalDateTime.now());
         return Map.of("mensaje", "Escaneo registrado", "escaneo", checklogRepository.save(log));
     }
+
+    //metodo para registrar escaneo desde el endpoint específico de NFC, con validaciones adicionales para el código NFC y existencia del checkpoint asociado
+    public Map<String, Object> registrarEscaneoNfc(NfcScanRequestDTO request) {
+
+    if (request.getExecutionId() == null) {
+        throw new BadRequestException("La ronda es obligatoria.");
+    }
+
+    if (request.getNfcTagCode() == null || request.getNfcTagCode().isBlank()) {
+        throw new BadRequestException("El código NFC es obligatorio.");
+    }
+
+    RoundExecution round = roundExecutionRepository.findById(request.getExecutionId())
+            .orElseThrow(() -> new ResourceNotFoundException("Ronda no encontrada."));
+
+    if (round.getStatus() != RoundStatus.EN_PROGRESO) {
+        throw new BadRequestException("Ronda no activa.");
+    }
+
+    Checkpoint checkpoint = checkpointRepository.findByNfcTagCode(request.getNfcTagCode())
+            .orElseThrow(() -> new ResourceNotFoundException("Checkpoint NFC no encontrado."));
+
+    if (checklogRepository.existsByRoundExecutionIdAndCheckpointId(round.getId(), checkpoint.getId())) {
+        throw new BadRequestException("Punto ya escaneado.");
+    }
+
+    Checklog log = new Checklog();
+    log.setRoundExecution(round);
+    log.setCheckpoint(checkpoint);
+    log.setTimestamp(LocalDateTime.now());
+
+    return Map.of(
+            "mensaje", "Escaneo NFC registrado",
+            "escaneo", checklogRepository.save(log)
+    );
+}
 
     // --- CONSULTAS (Sin cambios, manteniendo tu lógica original) ---
     public Map<String, Object> obtenerEstadisticasGlobales(LocalDateTime inicio, LocalDateTime fin) {

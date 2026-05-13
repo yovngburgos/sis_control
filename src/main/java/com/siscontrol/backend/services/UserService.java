@@ -20,7 +20,7 @@ public class UserService {
     private UserRepository userRepository;
 
     public Optional<User> login(String username, String password) {
-        Optional<User> userOpt = userRepository.findByUsername(username);
+        Optional<User> userOpt = userRepository.findByUsernameOrEmail(username, username);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (user.getPassword().equals(password)) {
